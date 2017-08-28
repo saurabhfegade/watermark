@@ -4,8 +4,6 @@ import PIL.Image
 import PIL.ImageEnhance
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-global gauth
-global drive
 
 #####################################################################################################################################
 
@@ -30,22 +28,24 @@ def DriveDownload():
             file6 = drive.CreateFile({'id': f['id']})
             file6.GetContentFile(os.path.join('downloaded',"%s" %f['title']))
 
-    #ListFolder('root')
-    ListFolder('0B0DHX3t01_6YVXpLdW9SRlVpVWM') # Specify the parameters as your folder id from which you want to download images-->Right click on the folder-->Click on 'Get Shareable Link'-->Extreme left part is the folder id
+    ListFolder('0B0DHX3t01_6YVXpLdW9SRlVpVWM') # Specify the parameters as your folder id from which you want to download images
+    #-->Right click on the folder-->Click on 'Get Shareable Link'-->Extreme left part is the folder id
 
 ######################################################################################################################################
 
-'''def DriveUpload(dir1):
+def DriveUpload(dir1):
     gauth = GoogleAuth()
+    gauth.LocalWebserverAuth()
     drive = GoogleDrive(gauth)
-    new_folder = drive.CreateFile({'title':'{}'.format('test'),'mimeType':'application/vnd.google-apps.folder'})
+    new_folder = drive.CreateFile({'title':'{}'.format('test'),'mimeType':'application/vnd.google-apps.folder'}) #Creates a 
+                                                                                                        #new folder on drive
     new_folder.Upload()
     fnames = listdir(dir1)
     for fname in fnames:
         if (fname.endswith(".jpg") or fname.endswith(".png")):
             nfile = drive.CreateFile({'title':os.path.basename(fname),'parents':[{u'id': new_folder['id']}]})
             nfile.SetContentFile(fname)
-            nfile.Upload()'''
+            nfile.Upload()
 #####################################################################################################################################
 
 def WaterMark(directory):
@@ -53,43 +53,43 @@ def WaterMark(directory):
     
     editFiles = []                                   #creates list which will fill up with all images from specified directory above.
     
-    for item in dirListing:                          #loops through directory and fills list with .JPG (specify according to user) .   
+    for item in dirListing:                          #loops through directory and fills list with .jpg and .png (specify according to user) .   
         if (item.endswith(".png") or item.endswith(".jpg")):
             editFiles.append(item)
     print (editFiles)
     print (len(editFiles))
     y=100
-    ######################################
     os.makedirs('saved', exist_ok=True)
-    ######################################
-    for i in range (0, len(editFiles)):              #performs  action on the photos in list
+
+    for i in range (0, len(editFiles)):              
         # images
         
-        base_path = editFiles[i]                    #pass image files in list to variable base_path
+        base_path = editFiles[i]                    
         
-        watermark_path = r'C:/Users/Rohit/Desktop/ieeelogo.png'                  #sepecify the path of the ieee logo here. 
+        watermark_path = r'C:/Users/Rohit/Desktop/ieeelogo.png'                  #sepecify the path of the 1st logo here. 
         
-        watermark_path2 = r'C:/Users/Rohit/Desktop/vitlogo.png'             #specify the path of the vit logo here.
+        watermark_path2 = r'C:/Users/Rohit/Desktop/vitlogo.png'             #specify the path of the 2nd logo here.
         base = PIL.Image.open(base_path)            
         width, height= base.size
-        watermark = PIL.Image.open(watermark_path)  #opens watermark and pass to watermark variable
+        watermark = PIL.Image.open(watermark_path)  
         wat1width, wat1height= watermark.size
         
-        watermark2 = PIL.Image.open(watermark_path2)  #opens second watermark and pass to watermark2 variable
+        watermark2 = PIL.Image.open(watermark_path2)  
         wat2width, wat2height= watermark2.size
     
-                                                       # optional lightness of watermark from 0.0 to 1.0
+        # optional lightness of watermark from 0.0 to 1.0
         brightness = 0.5
         watermark = PIL.ImageEnhance.Brightness(watermark).enhance(brightness)
         watermark2 = PIL.ImageEnhance.Brightness(watermark2).enhance(brightness)
     
         # apply the watermark
         
-        some_xy_offset = (int(width/192), int(height/54))                      # x and y cood of ieee logo
-        some_xy2_offset = (int(width-width/4)-15, 10)  #x and y cood of vit logo
+        some_xy_offset = (int(width/192), int(height/54))                      # x and y cood of 1st logo
+        some_xy2_offset = (int(width-width/4)-15, 10)                          # x and y cood of 2nd logo
     
         
-        watermark=watermark.resize((int(width/9.66), int(height/7)))  #resizes logo image to maintain aspect ratio wrt main image(using  pixel ratios).
+        watermark=watermark.resize((int(width/9.66), int(height/7)))  #resizes logo image 
+                                                                      
         watermark2=watermark2.resize((int(width/4),int(height/9.81)))
         
         # the mask uses the transparency of the watermark (if it exists)
@@ -101,25 +101,16 @@ def WaterMark(directory):
         #base.show()                                                   #display each image
         y=y+1
 
-
+##################################################################################################################################
 method = int(input("Press 1 for drive and 2 for folder on pc:"))
+
 if (method == 1):
     DriveDownload()
     directory = r"C:/Users/Rohit/Desktop/PyWatermark -PyDrive/downloaded"
     WaterMark(directory)
-    #DriveUpload(dir1)
-    gauth = GoogleAuth()
-    gauth.LocalWebserverAuth()
-    drive = GoogleDrive(gauth)
-    new_folder = drive.CreateFile({'title':'{}'.format('test'),'mimeType':'application/vnd.google-apps.folder'})
-    new_folder.Upload()
-    fnames = listdir(r"C:/Users/Rohit/Desktop/PyWatermark -PyDrive/saved")
-    for fname in fnames:
-        if (fname.endswith(".jpg") or fname.endswith(".png")):
-            nfile = drive.CreateFile({'title':'fname' ,'parents':[{u'id': new_folder['id']}]}) #'title':os.path.basename(fname)
-            nfile.SetContentFile(fname)
-            nfile.Upload()
+    dir1 = r"C:/Users/Rohit/Desktop/PyWatermark -PyDrive/saved"
+    DriveUpload(dir1)
+    
 elif(method == 2):
     directory = r"C:/Users/Rohit/Desktop/PyWatermark -PyDrive"
     WaterMark(directory)
-
